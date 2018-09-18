@@ -45,6 +45,7 @@ CFLAGS += -I. -std=c99 -Wall -Wextra -Wundef -Wshadow -Wcast-align -Wcast-qual -
 LIBDIR?= $(PREFIX)/lib
 INCLUDEDIR=$(PREFIX)/include
 
+# LDFLAGS ?= -lz
 
 # OS X linker doesn't support -soname, and use different extension
 # see : https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/DynamicLibraryDesignGuidelines.html

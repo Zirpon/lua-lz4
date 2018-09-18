@@ -4,7 +4,7 @@ ifeq ($(UNAME), Linux)
 # linux config
 LUA_INCDIR ?= /usr/include/lua5.1
 LUA_LIBDIR ?= /usr/lib
-LIBFLAGS   ?= -shared
+LIBFLAGS   ?= -shared -lz
 endif
 ifeq ($(UNAME), Darwin)
 # macosx config
@@ -14,7 +14,8 @@ LIBFLAGS   ?= -bundle -undefined dynamic_lookup -all_load
 endif
 
 LUALIB     ?= lz4.so
-LUA_CFLAGS ?= -O2 -fPIC
+#LUA_CFLAGS ?= -O2 -fPIC
+LUA_CFLAGS ?= -g -O2 -fPIC
 
 LZ4OBJS     = lz4/lz4.o lz4/lz4hc.o lz4/lz4frame.o lz4/xxhash.o
 

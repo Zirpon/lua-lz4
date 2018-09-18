@@ -9,6 +9,7 @@
 
 #include "lz4/lz4.h"
 #include "lz4/lz4hc.h"
+#include "zlib.h"
 
 
 #define LZ4_DICTSIZE      65536
@@ -121,6 +122,52 @@ static int lz4_compress(lua_State *L)
   }
 
   return 1;
+}
+
+static int zlib_compress(lua_State *L)
+{
+	size_t in_len;
+	const char *in = luaL_checklstring(L, 1, &in_len);
+	//size_t bound, r;
+
+	//static Bytef* buffer = NULL;
+
+	uLong tlen = compressBound(in_len);
+	//buffer = (Bytef*)malloc(tlen);
+
+	LUABUFF_NEW(b, out, tlen)
+	int r = compress((Bytef*)out, (uLongf*)&tlen, (const Bytef*)in, (uLong)in_len);
+	if (r != Z_OK)
+	{
+		luaL_error(NULL,"zlib_compress error[%d]", r);
+		return -1;
+	}
+
+	LUABUFF_PUSH(b, out, tlen)
+	lua_pushinteger(L, in_len);
+	lua_pushinteger(L, tlen);
+	lua_pushinteger(L, r);
+
+	//lua_pushlstring(L, (const char *)buffer, tlen);
+	return 4;
+}
+
+static int zlib_decompress(lua_State *L)
+{
+	size_t in_len;
+	const char *in = luaL_checklstring(L, 1, &in_len);
+	size_t originallen = lua_tointeger(L,2);
+
+	LUABUFF_NEW(b, out, originallen);
+	int ok = uncompress((Bytef*)out,(uLongf*)&originallen,(Bytef*)in,(uLong)in_len);
+	if(ok != Z_OK)
+	{
+		luaL_error(NULL,"zlib_decompress error[%d]", ok);
+		return -1;
+	}
+
+	LUABUFF_PUSH(b, out, originallen)
+	return 1;
 }
 
 static int lz4_decompress(lua_State *L)
@@ -812,6 +859,8 @@ static const luaL_Reg export_functions[] = {
   { "new_compression_stream",         lz4_new_compression_stream },
   { "new_compression_stream_hc",      lz4_new_compression_stream_hc },
   { "new_decompression_stream",       lz4_new_decompression_stream },
+  { "zlib_compress",                    zlib_compress },
+  { "zlib_decompress",                  zlib_decompress },
   { NULL,                             NULL },
 };
 
